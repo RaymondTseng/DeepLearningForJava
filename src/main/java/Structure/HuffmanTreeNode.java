@@ -9,7 +9,7 @@ package Structure;
  *
  * @author administrator
  */
-public class HuffmanTreeNode<T> implements Comparable<HuffmanTreeNode<T>>{
+public class HuffmanTreeNode<T> implements Comparable{
     private T data;
     private int weight;
     private HuffmanTreeNode<T> leftChild;
@@ -45,10 +45,11 @@ public class HuffmanTreeNode<T> implements Comparable<HuffmanTreeNode<T>>{
     }
     
     @Override
-    public int compareTo(HuffmanTreeNode<T> o) {
-        if (o.weight > weight) {
+    public int compareTo(Object o) {
+        HuffmanTreeNode node = (HuffmanTreeNode) o;
+        if (node.getWeight() > weight) {
             return 1;
-        } else if (weight < o.weight) {
+        } else if (node.getWeight() < weight) {
             return -1;
         } else {
             return 0;

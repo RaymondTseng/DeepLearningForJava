@@ -45,6 +45,39 @@ public class FileIO {
         return dataList;
     }
     
+    public static List<String> readSentences(String rootPath){
+        BufferedReader br = null;
+        List<String> sentences = new ArrayList<>();
+        try{
+            File file = new File(rootPath);
+            if (!file.isDirectory())
+                return sentences;
+            else{
+                String[] fileList = file.list();
+                for (String filePath : fileList){
+                    filePath = rootPath + "/" + filePath;
+                    br = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));
+                    List<String> temp = new ArrayList<>();
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        line = line.trim();
+                        if (!line.equals("")) {
+                            temp.add(line);
+                        }
+                    }
+                    if (temp.size() > 0) {
+                        sentences.add(temp.get(temp.size() - 1));
+                    }
+                }
+            }
+        }catch (Exception e){
+            System.err.println("read sentences error!!");
+        }
+        return sentences;
+    }
+    
+    
+    
 //    public static void main(String[] args){
 //        List<Data> dataList = readData("src/Resources/data.txt", 3, 1);
 //        System.out.println(dataList);

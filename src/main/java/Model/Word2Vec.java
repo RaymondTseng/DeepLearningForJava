@@ -47,31 +47,45 @@ public class Word2Vec {
         
         this.wordDict = new HashMap<>();
         this.wordEmbeddings = new HashMap<>();
+        this.words = new ArrayList<>();
+        this.word2Index = new HashMap<>();
+        
+        initVaribles();
+        train();
+        
     }
     
     private void initVaribles(){
+        System.out.println("build word dict...");
         buildWordDict();
+        System.out.println("build huffman tree...");
         this.wordTree = new HuffmanTree(wordDict);
+        this.wordTree.createWordTree(wordDict, size);
         for (Map.Entry entry : wordDict.entrySet()){
             String word = (String) entry.getKey();
-            wordEmbeddings.put(word, Utils.randomMatrix(1, size));
+            int value = (int) entry.getValue();
+            if (value > minCount)
+                wordEmbeddings.put(word, Utils.randomMatrix(1, size));
         }
     }
     
     private void buildWordDict(){
         for (List<String> sentence : sentences){
             for (String word : sentence){
-                words.add(word);
-                word2Index.put(word, words.size() - 1);
                 if(wordDict.containsKey(word))
                     wordDict.put(word, wordDict.get(word) + 1);
-                else
+                else{
+                    words.add(word);
+                    word2Index.put(word, words.size() - 1);
                     wordDict.put(word, 1);
+                }
             }
         }
     }
     
     private void train(){
+       System.out.println("training...");
+       double processCount = 0;
        for (List<String> sentence : sentences){
            for (int i = 0; i < sentence.size(); i++){
                String word = sentence.get(i);
@@ -82,12 +96,18 @@ public class Word2Vec {
                for (int j = leftIndex; j <= rightIndex; j++){
                    if (j != i){
                        String contextWord = sentence.get(j);
-                       contextWords.add(contextWord);
-                       embeddingSum = Utils.add(embeddingSum, wordEmbeddings.get(contextWord));
+                       double[][] contextWordEmbedding = wordEmbeddings.get(contextWord);
+                       if (contextWordEmbedding != null){
+                           embeddingSum = Utils.add(embeddingSum, wordEmbeddings.get(contextWord));
+                           contextWords.add(contextWord);
+                       }
                        compute(embeddingSum, word, contextWords);
                    }
                }
            }
+           if (processCount % 1000 == 0)
+               System.out.println(String.format("%.2f", processCount / sentences.size()));
+           processCount ++;
        }
     }
     
@@ -102,7 +122,7 @@ public class Word2Vec {
             double g = alpha * (1 - d - prob);
             e = Utils.add(e, Utils.dot(currentNode.getParameters(), g));
             currentNode.setParameters(Utils.add(currentNode.getParameters(), Utils.dot(embeddingSum, g)));
-            if (d == 0)
+            if (d == 1)
                 currentNode = (WordTreeNode) currentNode.getLeftChild();
             else
                 currentNode = (WordTreeNode) currentNode.getRightChild();
@@ -111,9 +131,5 @@ public class Word2Vec {
             double[][] v = Utils.add(wordEmbeddings.get(contextWord), e);
             wordEmbeddings.put(contextWord, v);
         }
-    }
-    
-    public static void main(String[] args){
-        
     }
 }

@@ -15,30 +15,30 @@ import Structure.HuffmanTreeNode;
 public class HuffmanTree<T> {
     private HuffmanTreeNode<T> root;
     private Map<T, String> huffmanCode;
+    
     public HuffmanTree(Map<T, Integer> wordDict){
-        root = createTree(wordDict);
         huffmanCode = new HashMap<>();
-        buildHuffmanCode();
     }
     
-    private HuffmanTreeNode<T> createTree(Map<T, Integer> wordDict){
+    public void createWordTree(Map<T, Integer> wordDict, int size){
         List<HuffmanTreeNode<T>> nodeList = new ArrayList<HuffmanTreeNode<T>>();
         for (Map.Entry<T, Integer> entry : wordDict.entrySet()){
-            nodeList.add(new HuffmanTreeNode<T>(entry.getKey(), entry.getValue()));
+            nodeList.add(new WordTreeNode<T>(entry.getKey(), entry.getValue()));
         }
         while (nodeList.size() > 1){
             Collections.sort(nodeList);
             HuffmanTreeNode<T> leftChild = nodeList.get(nodeList.size() - 1);
             HuffmanTreeNode<T> rightChild = nodeList.get(nodeList.size() - 2);
-            HuffmanTreeNode<T> parent = new HuffmanTreeNode<T>(null, 
-                    leftChild.getWeight() + rightChild.getWeight());
+            WordTreeNode<T> parent = new WordTreeNode<T>(null, 
+                    leftChild.getWeight() + rightChild.getWeight(), size);
             parent.setLeftChild(leftChild);
             parent.setRightChild(rightChild);
             nodeList.remove(leftChild);
             nodeList.remove(rightChild);
             nodeList.add(parent);
         }
-        return nodeList.get(0);
+        root = nodeList.get(0);
+        buildHuffmanCode();
     }
     
     private void buildHuffmanCode(){

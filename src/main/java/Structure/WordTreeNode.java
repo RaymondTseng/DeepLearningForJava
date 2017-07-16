@@ -15,8 +15,11 @@ public class WordTreeNode<T> extends HuffmanTreeNode<T>{
     
     public WordTreeNode(T data, int weight, int parameterNum) {
         super(data, weight);
-        if (data != null)
-            parameters = Utils.randomMatrix(1, parameterNum);
+        parameters = Utils.randomMatrix(1, parameterNum);
+    }
+    
+    public WordTreeNode(T data, int weight){
+        super(data, weight);
     }
 
     public double[][] getParameters() {
@@ -33,5 +36,6 @@ public class WordTreeNode<T> extends HuffmanTreeNode<T>{
         double prob = ActivationFunction.sigmoid(output[0][0]);
         return prob;
     }
+    
     
 }
