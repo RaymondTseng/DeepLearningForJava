@@ -26,6 +26,7 @@ public class Word2Vec {
     private double alpha;
     private int window;
     private int minCount;
+    private int trainNum;
     
     // hidden varibles
     private Map<String, Integer> wordDict;
@@ -42,6 +43,7 @@ public class Word2Vec {
         this.alpha = alpha;
         this.window = window;
         this.minCount = minCount;
+        this.trainNum = 10000;
         
         this.wordDict = new HashMap<>();
         this.wordEmbeddings = new HashMap<>();
@@ -82,19 +84,32 @@ public class Word2Vec {
                        String contextWord = sentence.get(j);
                        contextWords.add(contextWord);
                        embeddingSum = Utils.add(embeddingSum, wordEmbeddings.get(contextWord));
+                       compute(embeddingSum, word, contextWords);
                    }
                }
            }
        }
     }
     
-    private void forwardCompute(double[][] embeddingSum, String word, List<String> contextWords){
+    private void compute(double[][] embeddingSum, String word, List<String> contextWords){
         Map<String, String> huffmanCode = wordTree.getHuffmanCode();
         WordTreeNode currentNode = (WordTreeNode)wordTree.getRoot();
         String code = huffmanCode.get(word);
+        double[][] e = new double[1][size];
         for (int i = 0; i < code.length(); i++){
-            Character c = code.charAt(i);
+            int d = Integer.valueOf(String.valueOf(code.charAt(i)));
             double prob = currentNode.classify(embeddingSum);
+            double g = alpha * (1 - d - prob);
+            e = Utils.add(e, Utils.dot(currentNode.getParameters(), g));
+            currentNode.setParameters(Utils.add(currentNode.getParameters(), Utils.dot(embeddingSum, g)));
+            if (d == 0)
+                currentNode = (WordTreeNode) currentNode.getLeftChild();
+            else
+                currentNode = (WordTreeNode) currentNode.getRightChild();
+        }
+        for (String contextWord : contextWords){
+            double[][] v = Utils.add(wordEmbeddings.get(contextWord), e);
+            wordEmbeddings.put(contextWord, v);
         }
     }
     

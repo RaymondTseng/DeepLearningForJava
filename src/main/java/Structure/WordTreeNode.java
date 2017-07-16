@@ -23,6 +23,11 @@ public class WordTreeNode<T> extends HuffmanTreeNode<T>{
         return parameters;
     }
 
+    public void setParameters(double[][] parameters) {
+        this.parameters = parameters;
+    }
+    
+
     public double classify(double[][] x){
         double[][] output = Utils.dot(x, Utils.transposition(this.parameters));
         double prob = ActivationFunction.sigmoid(output[0][0]);
