@@ -12,15 +12,15 @@ package Utils;
 public class ActivationFunction {
     
     public static double sigmoid(double x){
-        return 1 / (1 + Math.pow(Math.E, -x));
+        return 1 / (1 + Math.exp(-x));
     }
     
     public static double sigmoidDerivative(double x){
-        return x / (1 - x);
+        return 1 - (1 / (1 + Math.exp(-x)));
     }
     
     public static double tanh(double x){
-        return (Math.pow(Math.E, x) - Math.pow(Math.E, -x)) / (Math.pow(Math.E, x) + Math.pow(Math.E, -x));
+        return (Math.exp(x) - Math.exp(-x)) / (Math.exp(x) + Math.exp(-x));
     }
     
     public static double tanhDerivative(double x){

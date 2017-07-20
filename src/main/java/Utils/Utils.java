@@ -116,6 +116,19 @@ public class Utils {
         return matrix;
     }
     
+    public static double[][] add(double[][] matrix, double[] nums){
+        if (nums.length != matrix.length)
+            return null;
+        for (int i = 0; i < nums.length; i++){
+            double num = nums[i];
+            for (int j = 0; j < matrix[i].length; j++){
+                matrix[i][j] += num;
+            }
+        }
+        return matrix;
+        
+    }
+    
     
     public static double getSumFromMatrix(double[][] matrix){
         double matrixSum = 0;
@@ -127,6 +140,13 @@ public class Utils {
         return matrixSum;
     }
     
+    public static void matrixClear(double[][] matrix){
+        for (int i = 0; i < matrix.length; i++){
+            for (int j = 0; j < matrix[i].length; j++){
+                matrix[i][j] = 0;
+            }
+        }
+    }
     public static void main(String[] args){
         double[][] m1 = {{2,2,2},{3,3,3}};
         double[][] m2 = {{1,3,4},{2,2,5},{3,1,6}};

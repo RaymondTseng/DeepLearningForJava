@@ -38,20 +38,22 @@ public class Activation {
     }
     
     private double[][] sigmoid(double[][] x){
+        double[][] result = new double[x.length][x[0].length];
         for (int i = 0; i < x.length; i++){
             for (int j = 0; j < x[i].length; j++){
-                x[i][j] = ActivationFunction.sigmoid(x[i][j]);
+                result[i][j] = ActivationFunction.sigmoid(x[i][j]);
             }
         }
-        return x;
+        return result;
     }
     
     private double[][] sigmoidDerivative(double[][] x){
+        double[][] result = new double[x.length][x[0].length];
         for (int i = 0; i < x.length; i++){
             for (int j = 0; j < x[i].length; j++){
-                x[i][j] = ActivationFunction.sigmoidDerivative(x[i][j]);
+                result[i][j] = ActivationFunction.sigmoidDerivative(x[i][j]);
             }
         }
-        return x;
+        return result;
     }
 }
