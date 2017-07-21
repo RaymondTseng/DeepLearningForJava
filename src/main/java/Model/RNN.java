@@ -12,6 +12,7 @@ import java.util.List;
  * @author gzzengzihang
  */
 public class RNN {
+    private static final String modelName = "RNN";
     private int nodeNum;
     private int inputNum;
     private int hiddenNum;
@@ -29,7 +30,7 @@ public class RNN {
     private List<double[][]> hiddenLayerValues;
     private List<double[][]> outputLayerValues;
     private List<double[][]> futureHiddenLayerDeltas;
-    private List<double[][]> errors;
+    private List<double[][]> outputs;
     private double[][] updateInputMatrix;
     private double[][] updateHiddenMatrix;
     private double[][] updateOutputMatrix;
@@ -59,14 +60,13 @@ public class RNN {
         this.hiddenLayerValues = new ArrayList<>();
         this.outputLayerValues = new ArrayList<>();
         this.futureHiddenLayerDeltas = new ArrayList<>();
-        this.errors = new ArrayList<>();
+        this.outputs = new ArrayList<>();
         
         
     }
     
     private void forwardCompute(List<Data> dataList, boolean ifOutput){
         hiddenLayerValues.add(new double[1][hiddenNum]);
-        List<double[][]> tempOutputs = new ArrayList<>();
         for (int i = 0; i < nodeNum; i++){
             Data data = dataList.get(i);
             double[][] prevHiddenLayerValue = hiddenLayerValues.get(i);
@@ -81,22 +81,18 @@ public class RNN {
                     double[][] outputLayerValue = Utils.dot(hiddenLayerValue, outputMatrix);
                     outputLayerValues.add(outputLayerValue);
                     output = activation.activation(outputLayerValue);
-                    errors.add(Utils.sub(data.getTarget(), output));
-//                    outputs.add(output);
-                
-//                    System.out.println(output[0][0]);
+                    outputs.add(output);
                 }
             }else{
                 double[][] outputLayerValue = Utils.dot(hiddenLayerValue, outputMatrix);
                 outputLayerValues.add(outputLayerValue);
                 output = activation.activation(outputLayerValue);
-                errors.add(Utils.sub(data.getTarget(), output));
-//                outputs.add(output);
-//                System.out.println(output[0][0]);
+                outputs.add(output);
             }
-            if (ifOutput){
+        }
+        if (ifOutput){
+            for (double[][] output : outputs){
                 System.out.println(activation.activationLabel(output));
-                tempOutputs.add(output);
             }
         }
     }
@@ -114,8 +110,7 @@ public class RNN {
             double[][] outputMatrixDelta;
             if (!ifSequence){
                 if (i == nodeNum - 1){
-                    double[][] error = errors.get(0);
-//                    double[][] error = Utils.sub(data.getTarget(), outputs.get(0));
+                    double[][] error = Utils.sub(data.getTarget(), outputs.get(0));
                     double[][] outputLayerValue = outputLayerValues.get(0);
                     // output x output matrix
                     outputMatrixDelta = Utils.dot(Utils.dot(error, 
@@ -127,8 +122,7 @@ public class RNN {
                     outputMatrixDelta = new double[1][1];
                 }
             }else{
-                double[][] error = errors.get(i);
-//                double[][] error = Utils.sub(data.getTarget(), outputs.get(i));
+                double[][] error = Utils.sub(data.getTarget(), outputs.get(i));
                 double[][] outputLayerValue = outputLayerValues.get(i);
                 // output x output matrix
                 outputMatrixDelta = Utils.dot(Utils.dot(error,
@@ -156,13 +150,13 @@ public class RNN {
         hiddenLayerValues.clear();
         outputLayerValues.clear();
         futureHiddenLayerDeltas.clear();
-        errors.clear();
+        outputs.clear();
     }
     
     private void updateParameters(){
-        outputMatrix = Utils.add(outputMatrix, Utils.dot(updateOutputMatrix, learningRate));
-        hiddenMatrix = Utils.add(hiddenMatrix, Utils.dot(updateHiddenMatrix, learningRate));
-        inputMatrix = Utils.add(inputMatrix, Utils.dot(updateInputMatrix, learningRate));
+        outputMatrix = Utils.add(outputMatrix, Utils.dot(updateOutputMatrix, -1 * learningRate));
+        hiddenMatrix = Utils.add(hiddenMatrix, Utils.dot(updateHiddenMatrix, -1 * learningRate));
+        inputMatrix = Utils.add(inputMatrix, Utils.dot(updateInputMatrix, -1 * learningRate));
         Utils.matrixClear(updateOutputMatrix);
         Utils.matrixClear(updateHiddenMatrix);
         Utils.matrixClear(updateInputMatrix);
@@ -187,7 +181,7 @@ public class RNN {
     public static void main(String[] args){
         String dataPath = "src/main/java/Resources/data.txt";
         List<Data> dataList = FileIO.readData(dataPath, 1, 3);
-        RNN rnn = new RNN(4, 3, 16, 1, -0.001, true);
+        RNN rnn = new RNN(4, 3, 16, 1, 0.001, true);
         rnn.train(100000, 128, dataList);
         rnn.predict(dataList);
     }
