@@ -37,6 +37,15 @@ public class Activation {
         }
     }
     
+    public int activationLabel(double[][] x){
+        switch(this.name){
+            case "sigmoid":
+                return sigmoidLabel(x);
+            default:
+                return sigmoidLabel(x);
+        }
+    }
+    
     private double[][] sigmoid(double[][] x){
         double[][] result = new double[x.length][x[0].length];
         for (int i = 0; i < x.length; i++){
@@ -55,5 +64,9 @@ public class Activation {
             }
         }
         return result;
+    }
+    
+    private int sigmoidLabel(double[][] x){
+        return ActivationFunction.sigmoidLabel(x[0][0]);
     }
 }

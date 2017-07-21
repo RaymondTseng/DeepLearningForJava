@@ -75,12 +75,13 @@ public class Utils {
     }
     
     public static double[][] dot(double[][] matrix, double num){
+        double[][] result = new double[matrix.length][matrix[0].length];
         for (int i = 0; i < matrix.length; i++){
             for (int j = 0; j < matrix[i].length; j++){
-                matrix[i][j] *= num;
+                result[i][j] = matrix[i][j] * num;
             }
         }
-        return matrix;
+        return result;
     }
     
     public static double[][] add(double[][] matrix1, double[][] matrix2){
@@ -108,21 +109,23 @@ public class Utils {
     }
     
     public static double[][] add(double[][] matrix, double num){
+        double[][] result = new double[matrix.length][matrix[0].length];
         for (int i = 0; i < matrix.length; i++){
             for (int j = 0; j < matrix[i].length; j++){
-                matrix[i][j] += num;
+                result[i][j] = matrix[i][j] + num;
             }
         }
-        return matrix;
+        return result;
     }
     
     public static double[][] add(double[][] matrix, double[] nums){
         if (nums.length != matrix.length)
             return null;
+        double[][] result = new double[matrix.length][matrix[0].length];
         for (int i = 0; i < nums.length; i++){
             double num = nums[i];
             for (int j = 0; j < matrix[i].length; j++){
-                matrix[i][j] += num;
+                result[i][j] = matrix[i][j] + num;
             }
         }
         return matrix;

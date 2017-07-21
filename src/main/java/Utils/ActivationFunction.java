@@ -19,11 +19,23 @@ public class ActivationFunction {
         return 1 - (1 / (1 + Math.exp(-x)));
     }
     
+    public static int sigmoidLabel(double x){
+        if (x >= 0.5)
+            return 1;
+        return 0;
+    }
+    
     public static double tanh(double x){
         return (Math.exp(x) - Math.exp(-x)) / (Math.exp(x) + Math.exp(-x));
     }
     
     public static double tanhDerivative(double x){
         return 1 - Math.pow(tanh(x), 2);
+    }
+    
+    public static int tanhLabel(double x){
+        if (x >= 0)
+            return 1;
+        return -1;
     }
 }
