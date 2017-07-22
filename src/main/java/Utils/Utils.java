@@ -150,6 +150,41 @@ public class Utils {
             }
         }
     }
+    
+    public static double[][] copyMatrix(double[][] matrix, int startRow, int endRow, 
+            int startColumn, int endColumn){
+        if (matrix == null){
+            return null;
+        }
+        if (startRow > endRow || startColumn > endColumn){
+            return null;
+        }
+        if (startRow < 0 || endRow > matrix.length){
+            return null;
+        }
+        if (startColumn < 0 || endColumn > matrix[0].length){
+            return null;
+        }
+        double[][] result = new double[endRow - startRow][endColumn - startColumn];
+        for (int i = startRow; i < endRow; i++){
+            for (int j = startColumn; j < endColumn; j++){
+                result[i - startRow][j - startColumn] = matrix[i][j];
+            }
+        }
+        return result;
+    }
+    
+    public static double convolution(double[][] matrix, double[][] filter){
+        double result = 0;
+        if (matrix.length != filter.length || matrix[0].length != filter[0].length)
+            return result;
+        for (int i = 0; i < matrix.length; i++){
+            for (int j = 0; j < matrix[0].length; j++){
+                result += matrix[i][j] * filter[i][j];
+            }
+        }
+        return result;
+    }
     public static void main(String[] args){
         double[][] m1 = {{2,2,2},{3,3,3}};
         double[][] m2 = {{1,3,4},{2,2,5},{3,1,6}};

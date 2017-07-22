@@ -45,6 +45,11 @@ public class FileIO {
         return dataList;
     }
     
+    /**
+     * read fenghuangwang news
+     * @param rootPath
+     * @return 
+     */
     public static List<String> readSentences(String rootPath){
         BufferedReader br = null;
         List<String> sentences = new ArrayList<>();
@@ -66,7 +71,9 @@ public class FileIO {
                         }
                     }
                     if (temp.size() > 0) {
-                        sentences.add(temp.get(temp.size() - 1));
+                        String[] tempSentences = temp.get(temp.size() - 1).split("？|。|!|\\?|!|\\.");
+                        for (String s : tempSentences)
+                            sentences.add(s);
                     }
                 }
             }

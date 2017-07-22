@@ -19,7 +19,8 @@ import java.util.*;
  */
 public class Word2VecDemo {
     
-    private static String path = "/media/raymondtseng/软件/nlp/数据/fenghuangwang";
+    private static String path = "/media/administrator/软件/NLP泰语组/data/fenghuangwang";
+    private static String savePath = "/media/administrator/软件/NLP泰语组/data/fenghuangwang_w2v.txt";
     
     private static List<List<String>> segmentUseJieba(List<String> sentences){
         List<List<String>> sentencesWords = new ArrayList<>();
@@ -43,7 +44,7 @@ public class Word2VecDemo {
         List<List<String>> sentencesWords = segmentUseJieba(sentences);
         System.out.println("start word2vec...");
         Word2Vec w2v = new Word2Vec(sentencesWords, 200, 0.025, 5, 5);
-        
+        w2v.save(savePath);
         System.out.println("done!");
 
         

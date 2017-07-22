@@ -8,6 +8,13 @@ package Model;
 import Structure.*;
 import java.util.*;
 import Utils.Utils;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.Buffer;
 
 /**
  *
@@ -43,7 +50,7 @@ public class Word2Vec {
         this.alpha = alpha;
         this.window = window;
         this.minCount = minCount;
-        this.trainNum = 10000;
+        this.trainNum = 5;
         
         this.wordDict = new HashMap<>();
         this.wordEmbeddings = new HashMap<>();
@@ -85,29 +92,34 @@ public class Word2Vec {
     
     private void train(){
        System.out.println("training...");
-       double processCount = 0;
-       for (List<String> sentence : sentences){
-           for (int i = 0; i < sentence.size(); i++){
-               String word = sentence.get(i);
-               int leftIndex = i - window < 0 ? 0 : i - window;
-               int rightIndex = i + window >= sentence.size() ? sentence.size() - 1 : i + window;
-               double[][] embeddingSum = new double[1][size];
-               List<String> contextWords = new ArrayList<>();
-               for (int j = leftIndex; j <= rightIndex; j++){
-                   if (j != i){
-                       String contextWord = sentence.get(j);
-                       double[][] contextWordEmbedding = wordEmbeddings.get(contextWord);
-                       if (contextWordEmbedding != null){
-                           embeddingSum = Utils.add(embeddingSum, wordEmbeddings.get(contextWord));
-                           contextWords.add(contextWord);
+       for (int t = 1; t <= trainNum; t++){
+           double processCount = 0;
+           for (List<String> sentence : sentences) {
+               for (int i = 0; i < sentence.size(); i++) {
+                   String word = sentence.get(i);
+                   int leftIndex = i - window < 0 ? 0 : i - window;
+                   int rightIndex = i + window >= sentence.size() ? sentence.size() - 1 : i + window;
+                   double[][] embeddingSum = new double[1][size];
+                   List<String> contextWords = new ArrayList<>();
+                   for (int j = leftIndex; j <= rightIndex; j++) {
+                       if (j != i) {
+                           String contextWord = sentence.get(j);
+                           double[][] contextWordEmbedding = wordEmbeddings.get(contextWord);
+                           if (contextWordEmbedding != null) {
+                               embeddingSum = Utils.add(embeddingSum, wordEmbeddings.get(contextWord));
+                               contextWords.add(contextWord);
+                           }
+                           compute(embeddingSum, word, contextWords);
                        }
-                       compute(embeddingSum, word, contextWords);
                    }
                }
+               if (processCount % 1000 == 0) {
+                   System.out.println("epoch:" + t + "," + 
+                           "processing:" + String.format("%.2f", processCount / sentences.size()) 
+                           + "% sentences");
+               }
+               processCount++;
            }
-           if (processCount % 1000 == 0)
-               System.out.println(String.format("%.2f", processCount / sentences.size()));
-           processCount ++;
        }
     }
     
@@ -130,6 +142,25 @@ public class Word2Vec {
         for (String contextWord : contextWords){
             double[][] v = Utils.add(wordEmbeddings.get(contextWord), e);
             wordEmbeddings.put(contextWord, v);
+        }
+    }
+    
+    public void save(String path){
+        BufferedWriter bw = null;
+        try{
+            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path)));
+            for (Map.Entry entry : this.wordEmbeddings.entrySet()){
+                String word = (String) entry.getKey();
+                double[] embedding = ((double[][]) entry.getValue())[0];
+                String temp = word;
+                for (double num : embedding){
+                    temp += " " + Double.toString(num);
+                }
+                bw.write(temp + "\n");
+            }
+            bw.close();
+        }catch (Exception e){
+            System.err.println("save model error!!");
         }
     }
 }

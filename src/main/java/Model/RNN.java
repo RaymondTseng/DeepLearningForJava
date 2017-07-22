@@ -26,10 +26,7 @@ public class RNN {
     private double[][] outputMatrix;
     
     // hidden value
-    private List<double[][]> beforeHiddenLayerValues;
-    private List<double[][]> hiddenLayerValues;
-    private List<double[][]> outputLayerValues;
-    private List<double[][]> futureHiddenLayerDeltas;
+    private List<double[][]> outputHiddenLayerValues;
     private List<double[][]> outputs;
     private double[][] updateInputMatrix;
     private double[][] updateHiddenMatrix;
@@ -56,100 +53,93 @@ public class RNN {
         this.updateHiddenMatrix = new double[hiddenNum][hiddenNum];
         this.updateOutputMatrix = new double[hiddenNum][outputNum];
         
-        this.beforeHiddenLayerValues = new ArrayList<>();
-        this.hiddenLayerValues = new ArrayList<>();
-        this.outputLayerValues = new ArrayList<>();
-        this.futureHiddenLayerDeltas = new ArrayList<>();
+        this.outputHiddenLayerValues = new ArrayList<>();
         this.outputs = new ArrayList<>();
         
         
     }
     
     private void forwardCompute(List<Data> dataList, boolean ifOutput){
-        hiddenLayerValues.add(new double[1][hiddenNum]);
+        outputHiddenLayerValues.add(new double[1][hiddenNum]);
         for (int i = 0; i < nodeNum; i++){
             Data data = dataList.get(i);
-            double[][] prevHiddenLayerValue = hiddenLayerValues.get(i);
-            double[][] beforeHiddenValue = Utils.add(Utils.dot(data.getDataMatrix(), 
-                    inputMatrix), Utils.dot(prevHiddenLayerValue, hiddenMatrix));
-            beforeHiddenLayerValues.add(beforeHiddenValue);
-            double[][] hiddenLayerValue = activation.activation(beforeHiddenValue);
-            hiddenLayerValues.add(hiddenLayerValue);
-            double[][] output = new double[1][1];
+            double[][] prevHiddenLayerValue = outputHiddenLayerValues.get(i);
+            double[][] outputHiddenLayerValue = activation.activation(Utils.add(
+                    Utils.dot(data.getDataMatrix(), inputMatrix), Utils.dot(
+                            prevHiddenLayerValue, hiddenMatrix)));
+            outputHiddenLayerValues.add(outputHiddenLayerValue);
             if (!ifSequence){
-                if (i == nodeNum - 1){   
-                    double[][] outputLayerValue = Utils.dot(hiddenLayerValue, outputMatrix);
-                    outputLayerValues.add(outputLayerValue);
-                    output = activation.activation(outputLayerValue);
+                if (i == nodeNum - 1){
+                    double[][] output = activation.activation(Utils.dot(outputHiddenLayerValue, outputMatrix));
                     outputs.add(output);
                 }
             }else{
-                double[][] outputLayerValue = Utils.dot(hiddenLayerValue, outputMatrix);
-                outputLayerValues.add(outputLayerValue);
-                output = activation.activation(outputLayerValue);
+                double[][] output = activation.activation(Utils.dot(outputHiddenLayerValue, outputMatrix));
                 outputs.add(output);
             }
         }
+        
         if (ifOutput){
             for (double[][] output : outputs){
-                System.out.println(activation.activationLabel(output));
+                System.out.println(output[0][0]);
             }
         }
+
     }
     
     private void backwardCompute(List<Data> dataList){
         int futureCount = 0;
+        List<double[][]> futureHiddenLayerDeltas = new ArrayList<>();
         futureHiddenLayerDeltas.add(new double[1][hiddenNum]);
-        
         for (int i = nodeNum - 1; i >= 0; i--){
             Data data = dataList.get(i);
-            double[][] beforeHiddenLayerValue = beforeHiddenLayerValues.get(i);
-            double[][] hiddenLayerValue = hiddenLayerValues.get(i + 1);
-            double[][] prevHiddenLayerValue = hiddenLayerValues.get(i);
+            double[][] outputHiddenLayerValue = outputHiddenLayerValues.get(i + 1);
+            double[][] prevOutputHiddenLayerValie = outputHiddenLayerValues.get(i);
             double[][] futureHiddenLayerDelta = futureHiddenLayerDeltas.get(futureCount);
             double[][] outputMatrixDelta;
+            
             if (!ifSequence){
                 if (i == nodeNum - 1){
                     double[][] error = Utils.sub(data.getTarget(), outputs.get(0));
-                    double[][] outputLayerValue = outputLayerValues.get(0);
+                    
                     // output x output matrix
-                    outputMatrixDelta = Utils.dot(Utils.dot(error, 
-                            activation.activationDerivative(outputLayerValue)), -1);
-                    // hidden x output matrix
-                    updateOutputMatrix = Utils.add(updateOutputMatrix, 
-                            Utils.transposition(Utils.dot(outputMatrixDelta, hiddenLayerValue)));
+                    outputMatrixDelta = Utils.dot(Utils.dot(error, -1),
+                            activation.activationDerivative(Utils.dot(outputHiddenLayerValue, outputMatrix)));
+
+                    updateOutputMatrix = Utils.add(updateOutputMatrix, Utils.dot(
+                            Utils.transposition(outputHiddenLayerValue), outputMatrixDelta));
                 }else{
                     outputMatrixDelta = new double[1][1];
                 }
             }else{
                 double[][] error = Utils.sub(data.getTarget(), outputs.get(i));
-                double[][] outputLayerValue = outputLayerValues.get(i);
+
                 // output x output matrix
-                outputMatrixDelta = Utils.dot(Utils.dot(error,
-                        activation.activationDerivative(outputLayerValue)), -1);
-                // hidden x output matrix
-                updateOutputMatrix = Utils.add(updateOutputMatrix,
-                        Utils.transposition(Utils.dot(outputMatrixDelta, hiddenLayerValue)));
-                
+                outputMatrixDelta = Utils.dot(Utils.dot(error, -1),
+                        activation.activationDerivative(Utils.dot(outputHiddenLayerValue, outputMatrix)));
+
+                updateOutputMatrix = Utils.add(updateOutputMatrix, Utils.dot(
+                        Utils.transposition(outputHiddenLayerValue), outputMatrixDelta));
             }
-            // ouput x hidden matrix
-            double[][] hiddenMatrixDelta = Utils.multiple(Utils.add(Utils.dot(outputMatrixDelta,
-                    Utils.transposition(outputMatrix)), futureHiddenLayerDelta),
-                    activation.activationDerivative(beforeHiddenLayerValue));
-            // hidden x hidden matrix
-            updateHiddenMatrix = Utils.add(updateHiddenMatrix, Utils.dot(
-                    Utils.transposition(hiddenMatrixDelta), prevHiddenLayerValue));
-
-            updateInputMatrix = Utils.add(updateInputMatrix, Utils.dot(
-                    Utils.transposition(data.getDataMatrix()), hiddenMatrixDelta));
-
-            futureHiddenLayerDeltas.add(hiddenMatrixDelta);
-            futureCount++;
+            
+            // output x hidden matrix
+            double[][] HIMatrixDelta = Utils.multiple(Utils.add(futureHiddenLayerDelta, 
+                    Utils.dot(outputMatrixDelta, Utils.transposition(outputMatrix))), 
+                    activation.activation(Utils.add(Utils.dot(data.getDataMatrix(), 
+                            inputMatrix), Utils.dot(prevOutputHiddenLayerValie, hiddenMatrix))));
+            
+            futureHiddenLayerDeltas.add(HIMatrixDelta);
+            
+            updateHiddenMatrix = Utils.add(updateHiddenMatrix, Utils.dot(Utils.transposition(
+                    prevOutputHiddenLayerValie), HIMatrixDelta));
+            
+            updateInputMatrix = Utils.add(updateInputMatrix, Utils.dot(Utils.transposition(
+                    data.getDataMatrix()), HIMatrixDelta));
+            
+            futureCount ++;
+            
         }
-        beforeHiddenLayerValues.clear();
-        hiddenLayerValues.clear();
-        outputLayerValues.clear();
-        futureHiddenLayerDeltas.clear();
+        outputHiddenLayerValues.clear();
         outputs.clear();
     }
     
@@ -174,16 +164,6 @@ public class RNN {
     
     public void predict(List<Data> dataList){
         forwardCompute(dataList, true);
-    }
-    
-
-    
-    public static void main(String[] args){
-        String dataPath = "src/main/java/Resources/data.txt";
-        List<Data> dataList = FileIO.readData(dataPath, 1, 3);
-        RNN rnn = new RNN(4, 3, 16, 1, 0.001, true);
-        rnn.train(100000, 128, dataList);
-        rnn.predict(dataList);
     }
 
 }
