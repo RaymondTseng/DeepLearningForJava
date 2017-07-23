@@ -185,6 +185,45 @@ public class Utils {
         }
         return result;
     }
+    
+    public static int[][][] maxPooling(double[][] matrix, double rate){
+        if (matrix == null)
+            return null;
+        int elementNum = matrix.length * matrix[0].length;
+        int row = (int) (matrix.length * rate);
+        row = row > 0 ? row : 1;
+        int column = (int) (matrix[0].length * rate);
+        column = column > 0 ? column : 1;
+        int rowSize = (int)Math.round((double) matrix.length / row);
+        int columnSize = (int)Math.round((double) matrix[0].length / column);
+        int[][][] result = new int[row][column][2];
+        for (int i = 0; i < row; i++){
+            for (int j = 0; j < column; j++){
+                int startRow = i * rowSize;
+                int startColumn = j * columnSize;
+                result[i][j] = findMaxValueInMatrix(matrix, startRow, 
+                        startRow + rowSize, startColumn, startColumn + columnSize);
+            }
+        }
+        return result;
+    }
+    
+    public static int[] findMaxValueInMatrix(double[][] matrix, int startRow, 
+            int endRow, int startColumn, int endColumn){
+        int[] indices = new int[2];
+        double max = matrix[startRow][startColumn];
+        for (int i = startRow; i < endRow; i++){
+            for (int j = startColumn; j < endColumn; j++){
+                if (matrix[i][j] > max){
+                    max = matrix[i][j];
+                    indices[0] = i;
+                    indices[1] = j;
+                }
+            }
+        }
+        return indices;
+    }
+    
     public static void main(String[] args){
         double[][] m1 = {{2,2,2},{3,3,3}};
         double[][] m2 = {{1,3,4},{2,2,5},{3,1,6}};
