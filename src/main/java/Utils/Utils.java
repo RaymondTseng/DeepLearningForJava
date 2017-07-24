@@ -14,7 +14,7 @@ public class Utils {
         double[][] matrix = new double[row][column];
         for (int i = 0; i < row; i++){
             for (int j = 0; j < column; j++){
-                matrix[i][j] = Math.random();
+                matrix[i][j] = (Math.random() * 2) - 1;
             }
         }
         return matrix;

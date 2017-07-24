@@ -83,10 +83,7 @@ public class FileIO {
         return sentences;
     }
     
-    
-    
-//    public static void main(String[] args){
-//        List<Data> dataList = readData("src/Resources/data.txt", 3, 1);
-//        System.out.println(dataList);
-//    }
+    private FileIO(){
+        
+    }
 }

@@ -37,6 +37,7 @@ public class CNN {
     private List<double[][]> convolutionResults;
 
     // loss function 1 / 2 (y - d)^2
+    
     public CNN(int rowNum, int columnNum, int outputNum, double learningRate, List<Integer> filterSizes) {
         this.rowNum = rowNum;
         this.columnNum = columnNum;
@@ -101,9 +102,8 @@ public class CNN {
 
     private void backwardCompute(Data data) {
         double[][] error = Utils.sub(data.getTarget(), output);
-
-        double[][] outputMatrixDelta = Utils.dot(Utils.dot(error, -1), Utils.dot(
-                maxPoolingLayerValue, outputMatrix));
+        double[][] outputMatrixDelta = Utils.dot(Utils.dot(error, -1), 
+                activation.activationDerivative(Utils.dot(maxPoolingLayerValue, outputMatrix)));
 
         updateOutputMatrix = Utils.add(updateOutputMatrix, Utils.dot(
                 Utils.transposition(maxPoolingLayerValue), outputMatrixDelta));
@@ -176,7 +176,7 @@ public class CNN {
         String dataPath = "src/main/java/Resources/cnn_data.txt";
         List<Data> dataList = FileIO.readData(dataPath, 4, 3);
         CNN cnn = new CNN(4, 3, 1, 0.001, null);
-        cnn.train(100000, 100, dataList);
+        cnn.train(10000, 1, dataList);
 
     }
 }
