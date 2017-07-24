@@ -151,7 +151,7 @@ public class CNN {
 
         for (int i = 0; i < trainNum; i++) {
             for (Data data : dataList) {
-                fowardCompute(data, true);
+                fowardCompute(data, false);
                 backwardCompute(data);
                 if ((i + 1) % batchSize == 0) {
                     updateParameters();
@@ -171,12 +171,15 @@ public class CNN {
             Utils.matrixClear(updateFilters.get(i));
         }
     }
-
-    public static void main(String[] args) {
-        String dataPath = "src/main/java/Resources/cnn_data.txt";
-        List<Data> dataList = FileIO.readData(dataPath, 4, 3);
-        CNN cnn = new CNN(4, 3, 1, 0.001, null);
-        cnn.train(10000, 1, dataList);
-
+    
+    public void predict(List<Data> dataList){
+        for (Data data : dataList){
+            fowardCompute(data, true);
+            Utils.matrixClear(output);
+            Utils.matrixClear(maxPoolingLayerValue);
+            convolutionResults.clear();
+            maxPoolingIndices.clear();
+        }
     }
+
 }

@@ -20,5 +20,6 @@ public class CNNDemo {
         List<Data> dataList = FileIO.readData(dataPath, 4, 3);
         CNN cnn = new CNN(4, 3, 1, 0.001, null);
         cnn.train(10000, 1, dataList);
+        cnn.predict(dataList);
     }
 }
